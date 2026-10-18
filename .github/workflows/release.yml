@@ -1,0 +1,39 @@
+name: Release
+
+# 推 tag（v*）或手动触发时：编译 → 打包 zip → 发布到 GitHub Releases。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: '版本 tag（如 v1.0.0）'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest  # Apple Silicon（arm64），对应预编译包只支持 arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 编译
+        run: ./build.sh
+
+      - name: 打包
+        run: |
+          mkdir -p dist/K3BatterySync
+          cp K3BatterySync.sh dist/K3BatterySync/
+          cp K3BatterySyncService dist/K3BatterySync/
+          cp README.md dist/K3BatterySync/
+          (cd dist && zip -r ../K3BatterySync-arm64.zip K3BatterySync)
+
+      - name: 发布到 GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          files: K3BatterySync-arm64.zip
+          generate_release_notes: true

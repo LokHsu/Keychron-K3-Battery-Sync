@@ -1,0 +1,6 @@
+# 编译产物 —— build.sh / swiftc 生成，不进版本库
+K3BatterySyncService
+k3-battery-read/k3batt
+
+# macOS
+.DS_Store
